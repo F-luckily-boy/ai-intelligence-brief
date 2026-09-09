@@ -217,6 +217,8 @@ def load_builder_evidence(path: Path) -> list[dict[str, Any]]:
 
 def parse_xml_feed(data: bytes, spec: dict[str, Any]) -> list[dict[str, Any]]:
     root = ET.fromstring(data)
+    exclude_title_pattern = str(spec.get("exclude_title_pattern") or "")
+    max_summary_chars = int(spec.get("max_summary_chars") or 0)
     entries = [
         element
         for element in root.iter()
@@ -231,6 +233,12 @@ def parse_xml_feed(data: bytes, spec: dict[str, Any]) -> list[dict[str, Any]]:
         author = strip_html(first_text(entry, {"creator", "author", "name"}))
         if not title or not url or not published:
             continue
+        if exclude_title_pattern and re.search(
+            exclude_title_pattern, title, flags=re.I
+        ):
+            continue
+        if max_summary_chars and len(summary) > max_summary_chars:
+            summary = summary[:max_summary_chars].rstrip()
         item = {
             "title": title,
             "url": url,
@@ -423,11 +431,14 @@ def parse_article_metadata(data: bytes, url: str, source: str) -> dict[str, Any]
         or parser.meta.get("twitter:description")
     )
     patterns = (
+        r'<meta[^>]+(?:property|name)=["\'](?:article:published_time|date|pubdate)["\'][^>]+content=["\']([^"\']+)',
         r'"datePublished"\s*:\s*"([^"]+)"',
         r'\\"datePublished\\"\s*:\s*\\"([^"\\]+)',
+        r'\\"publishedAt\\"\s*:\s*\\"([^"\\]+)',
         r'\\"addtime\\"\s*:\s*\\"([^"\\]+)',
         r'"addtime"\s*:\s*"([^"]+)"',
         r"(20\d\d-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?[+-]\d\d:\d\d)",
+        r">\s*([A-Z][a-z]+ \d{1,2}, 20\d\d)\s*<",
     )
     published = ""
     for pattern in patterns:
@@ -446,6 +457,194 @@ def parse_article_metadata(data: bytes, url: str, source: str) -> dict[str, Any]
         "kind": "news",
         "channel": "radar",
     }
+
+
+class LinkParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.links: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.casefold() != "a":
+            return
+        values = {key.casefold(): value or "" for key, value in attrs}
+        href = values.get("href", "").strip()
+        if href:
+            self.links.append(href)
+
+
+def extract_index_links(data: bytes, spec: dict[str, Any]) -> list[str]:
+    parser = LinkParser()
+    parser.feed(data.decode("utf-8", errors="replace"))
+    pattern = re.compile(str(spec["link_pattern"]))
+    base_url = str(spec.get("base_url") or spec["url"])
+    links: list[str] = []
+    for href in parser.links:
+        absolute = urljoin(base_url, href)
+        if not pattern.search(urlsplit(absolute).path):
+            continue
+        if absolute not in links:
+            links.append(absolute)
+        if len(links) >= int(spec.get("max_items", 80)):
+            break
+    return links
+
+
+def collect_article_pages(
+    links: list[str],
+    spec: dict[str, Any],
+    timeout: float,
+    workers: int,
+) -> list[dict[str, Any]]:
+    result: list[dict[str, Any]] = []
+    errors: list[str] = []
+    with ThreadPoolExecutor(max_workers=min(max(workers, 1), 12)) as pool:
+        futures = {pool.submit(fetch, url, timeout): url for url in links}
+        for future in as_completed(futures):
+            url = futures[future]
+            try:
+                item = parse_article_metadata(future.result(), url, spec["name"])
+            except Exception as exc:
+                errors.append(f"{url}: {exc}")
+                continue
+            if not item:
+                continue
+            item["kind"] = spec.get("kind", "news")
+            item["channel"] = spec.get("channel", "radar")
+            if spec.get("community_group"):
+                item["community_group"] = spec["community_group"]
+            result.append(item)
+    if links and not result and errors:
+        raise RuntimeError(
+            f"article parsing failed for {len(errors)} items; first: {errors[0]}"
+        )
+    return result
+
+
+def collect_article_index(
+    spec: dict[str, Any], timeout: float, workers: int
+) -> list[dict[str, Any]]:
+    links = extract_index_links(fetch(spec["url"], timeout), spec)
+    return collect_article_pages(links, spec, timeout, workers)
+
+
+def collect_sitemap_articles(
+    spec: dict[str, Any], timeout: float, workers: int
+) -> list[dict[str, Any]]:
+    root = ET.fromstring(fetch(spec["url"], timeout))
+    prefixes = tuple(str(value) for value in spec.get("path_prefixes", []))
+    links: list[str] = []
+    for element in root.iter():
+        if local_name(element.tag) != "loc" or not element.text:
+            continue
+        url = element.text.strip()
+        path = urlsplit(url).path
+        if prefixes and not path.startswith(prefixes):
+            continue
+        links.append(url)
+        if len(links) >= int(spec.get("max_items", 80)):
+            break
+    return collect_article_pages(links, spec, timeout, workers)
+
+
+class GitHubTrendingParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self.items: list[dict[str, Any]] = []
+        self.depth = 0
+        self.in_heading = False
+        self.in_description = False
+        self.in_language = False
+        self.current: dict[str, Any] | None = None
+        self.text: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values = {key.casefold(): value or "" for key, value in attrs}
+        classes = set(values.get("class", "").split())
+        if tag.casefold() == "article" and "Box-row" in classes:
+            self.depth = 1
+            self.current = {"description": "", "language": ""}
+            self.text = []
+            return
+        if not self.current:
+            return
+        self.depth += 1
+        if tag.casefold() == "h2":
+            self.in_heading = True
+        elif tag.casefold() == "p" and "color-fg-muted" in classes:
+            self.in_description = True
+        elif tag.casefold() == "span" and values.get("itemprop") == "programmingLanguage":
+            self.in_language = True
+        elif tag.casefold() == "a" and self.in_heading and values.get("href"):
+            self.current["path"] = values["href"]
+
+    def handle_endtag(self, tag: str) -> None:
+        if not self.current:
+            return
+        if tag.casefold() == "h2":
+            self.in_heading = False
+        elif tag.casefold() == "p":
+            self.in_description = False
+        elif tag.casefold() == "span":
+            self.in_language = False
+        self.depth -= 1
+        if self.depth != 0:
+            return
+        combined = re.sub(r"\s+", " ", " ".join(self.text))
+        match = re.search(r"([\d,]+)\s+stars today", combined, flags=re.I)
+        self.current["stars_today"] = int(match.group(1).replace(",", "")) if match else 0
+        if self.current.get("path"):
+            self.items.append(self.current)
+        self.current = None
+
+    def handle_data(self, data: str) -> None:
+        if not self.current:
+            return
+        value = re.sub(r"\s+", " ", data).strip()
+        if not value:
+            return
+        self.text.append(value)
+        if self.in_description:
+            self.current["description"] = (
+                f"{self.current.get('description', '')} {value}".strip()
+            )
+        if self.in_language:
+            self.current["language"] = value
+
+
+def collect_github_trending(
+    spec: dict[str, Any], timeout: float, cutoff: datetime
+) -> list[dict[str, Any]]:
+    observed_at = datetime.now(timezone.utc)
+    if abs((observed_at - cutoff).total_seconds()) > 3600:
+        raise ValueError(
+            "GitHub Trending is a live snapshot and cannot represent a historical cutoff"
+        )
+    effective_at = min(observed_at, cutoff - timedelta(microseconds=1))
+    parser = GitHubTrendingParser()
+    parser.feed(fetch(spec["url"], timeout).decode("utf-8", errors="replace"))
+    result: list[dict[str, Any]] = []
+    for raw in parser.items[: int(spec.get("max_items", 50))]:
+        path = str(raw["path"])
+        repository = re.sub(r"\s+", "", path.strip("/"))
+        tags = [str(raw.get("language") or "")] if raw.get("language") else []
+        result.append(
+            {
+                "title": repository,
+                "url": urljoin("https://github.com", path),
+                "source": spec["name"],
+                "published_at": effective_at.isoformat(),
+                "observed_at": observed_at.isoformat(),
+                "timestamp_type": "observed_at",
+                "summary": str(raw.get("description") or ""),
+                "kind": spec.get("kind", "community"),
+                "channel": spec.get("channel", "community"),
+                "community_group": spec.get("community_group", "GitHub Trending"),
+                "metrics": {"points": int(raw.get("stars_today") or 0), "comments": 0},
+                "tags": tags,
+            }
+        )
+    return result
 
 
 def extract_aibase_article_ids(index: str, max_items: int) -> list[str]:
@@ -501,14 +700,23 @@ def collect_aibase(spec: dict[str, Any], timeout: float, workers: int) -> list[d
     return result
 
 
-def collect_hacker_news(spec: dict[str, Any], timeout: float, workers: int) -> list[dict[str, Any]]:
+def collect_hacker_news(
+    spec: dict[str, Any],
+    timeout: float,
+    workers: int,
+    cutoff: datetime,
+) -> list[dict[str, Any]]:
     ids = json.loads(fetch(spec["url"], timeout).decode("utf-8"))
-    ids = ids[: int(spec.get("max_items", 180))]
+    ids = ids[: int(spec.get("scan_items", 500))]
+    start = cutoff - timedelta(hours=24)
 
     def load_item(item_id: int) -> dict[str, Any] | None:
         data = fetch(f"https://hacker-news.firebaseio.com/v0/item/{item_id}.json", timeout)
         raw = json.loads(data.decode("utf-8"))
         if not raw or raw.get("type") != "story" or not raw.get("title") or not raw.get("time"):
+            return None
+        published = parse_datetime(raw["time"])
+        if published is None or not (start <= published < cutoff):
             return None
         hn_url = f"https://news.ycombinator.com/item?id={item_id}"
         source_urls = {"Hacker News": hn_url}
@@ -540,17 +748,38 @@ def collect_hacker_news(spec: dict[str, Any], timeout: float, workers: int) -> l
                 continue
             if item:
                 result.append(item)
-    return result
+    result.sort(
+        key=lambda item: (
+            int(item.get("metrics", {}).get("points", 0)),
+            int(item.get("metrics", {}).get("comments", 0)),
+            str(item.get("published_at") or ""),
+        ),
+        reverse=True,
+    )
+    return result[: int(spec.get("max_items", 100))]
 
 
 def collect_feed(
-    spec: dict[str, Any], timeout: float, workers: int
+    spec: dict[str, Any],
+    timeout: float,
+    workers: int,
+    cutoff: datetime | None = None,
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     fmt = str(spec.get("format") or "auto")
     if fmt == "aibase_index":
         return collect_aibase(spec, timeout, workers), {}
     if fmt == "hacker_news":
-        return collect_hacker_news(spec, timeout, workers), {}
+        if cutoff is None:
+            raise ValueError("Hacker News collection requires a cutoff")
+        return collect_hacker_news(spec, timeout, workers, cutoff), {}
+    if fmt == "article_index":
+        return collect_article_index(spec, timeout, workers), {}
+    if fmt == "sitemap_articles":
+        return collect_sitemap_articles(spec, timeout, workers), {}
+    if fmt == "github_trending":
+        if cutoff is None:
+            raise ValueError("GitHub Trending collection requires a cutoff")
+        return collect_github_trending(spec, timeout, cutoff), {}
     data = fetch(spec["url"], timeout)
     if fmt == "auto":
         stripped = data.lstrip()
@@ -649,6 +878,14 @@ def main() -> int:
 
     items: list[dict[str, Any]] = []
     statuses: dict[str, list[dict[str, Any]]] = {}
+    for unavailable in config.get("unavailable_sources", []):
+        statuses.setdefault(str(unavailable["name"]), []).append(
+            {
+                "url": str(unavailable.get("url") or ""),
+                "status": "unavailable",
+                "reason": str(unavailable.get("reason") or "No reliable public feed"),
+            }
+        )
     empty_status = {"configured": 0, "ok": 0, "empty": 0, "failed": 0, "raw": 0}
     lane_status: dict[str, dict[str, int]] = {
         lane: dict(empty_status) for lane in ("radar", "builders", "community")
@@ -672,7 +909,7 @@ def main() -> int:
         kind_status[kind]["configured"] += 1
     with ThreadPoolExecutor(max_workers=max(args.workers, 1)) as pool:
         futures = {
-            pool.submit(collect_feed, spec, args.timeout, args.workers): spec
+            pool.submit(collect_feed, spec, args.timeout, args.workers, cutoff): spec
             for spec in specs
         }
         for future in as_completed(futures):

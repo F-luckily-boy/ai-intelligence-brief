@@ -9,6 +9,12 @@ published brief is not a score leaderboard.
 Observed source counts from a prior run, such as five official items or 53
 vertical-media items, are diagnostics rather than quotas.
 
+Official first-party items are always reviewed. Builders, community updates,
+and selected AI media are parallel review groups; keep every item from those
+groups that passes the relevance and freshness checks in the bounded review
+queue before filling the remaining space by global score. This preserves
+useful lanes without requiring any fixed count.
+
 ## Source Tiers
 
 ### Tier 0: official first-party
@@ -29,7 +35,8 @@ research, and engineering announcements.
 - IT之家
 - Cursor Blog
 - SemiAnalysis
-- Emad Mostaque, OpenClaw, 小红书技术、数字生命卡兹克
+- OpenClaw official releases, 小红书技术、数字生命卡兹克
+- Emad Mostaque when a direct post or reliable configured feed is available
 - Other explicitly configured AI-specialist feeds
 
 Verify consequential claims against a first-party source whenever one exists.
@@ -50,6 +57,19 @@ Tier 2 groups are peers. Source-specific weights express quality differences.
 
 - Run `scripts/collect_sources.py` before ranking. Query each lane independently
   so one prolific feed cannot crowd out the others before ranking.
+- Hacker News uses the official Top Stories endpoint, keeps only stories whose
+  timestamps fall inside the exact 24 hours before the cutoff, and orders them
+  by points, comments, then recency.
+- GitHub Trending is a live observation rather than a publication feed. Record
+  its observation timestamp and use it only when the requested cutoff is
+  within one hour of collection; never reuse today's snapshot in a historical
+  brief.
+- The WaytoAGI, 小红书技术, and 数字生命卡兹克 entries use public WeChat-to-RSS
+  relays while retaining the original `mp.weixin.qq.com` article URLs. Treat a
+  relay failure as missing coverage, not as evidence that no post exists.
+- OpenClaw uses the official GitHub Releases Atom feed. Exclude
+  `release-publish/*` CI artifacts and retain versioned releases; the official
+  website blog is not a fallback when it is unreachable from the collector.
 - Prefer the original URL. Aggregators are discovery surfaces, not automatic
   primary sources.
 - After shortlisting a secondary report, search for the announcing company's
@@ -68,6 +88,8 @@ Tier 2 groups are peers. Source-specific weights express quality differences.
   posts from profile pages, search snippets, or the roster.
 - Continue when a source fails. Keep failures in collection logs, outside the
   published brief.
+- Keep closed sources in `unavailable_sources` with a concrete reason. Do not
+  convert an X profile, search result, or snippet into an executable feed.
 - Record exact timestamps and timezones. Date-only pages stay out of a strict
   24-hour run until their time can be verified.
 - Use lane-specific lookbacks when the requested format includes them:

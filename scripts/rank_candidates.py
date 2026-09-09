@@ -352,6 +352,28 @@ def coverage_counts(items: list[dict[str, Any]]) -> dict[str, dict[str, int]]:
     return result
 
 
+def select_review_queue(
+    items: list[dict[str, Any]], limit: int
+) -> list[dict[str, Any]]:
+    """Preserve official and matched parallel lanes before global-score fill."""
+    if limit <= 0:
+        return []
+    protected_groups = {"official", "builders", "community", "selected_media"}
+    protected = [
+        item for item in items if str(item.get("source_group")) in protected_groups
+    ]
+    if len(protected) >= limit:
+        return protected[:limit]
+    selected_ids = {id(item) for item in protected}
+    remainder = [item for item in items if id(item) not in selected_ids]
+    selected = protected + remainder[: limit - len(protected)]
+    return sorted(
+        selected,
+        key=lambda row: (row["internal_score"], row["published_at"]),
+        reverse=True,
+    )
+
+
 def main() -> int:
     args = parse_args()
     if min(args.hours, args.builder_hours, args.community_hours, args.longform_hours) <= 0:
@@ -388,7 +410,7 @@ def main() -> int:
     merged = dedupe(prepared)
     seen_items = [item for path in args.seen for item in load_items(path)]
     unseen, seen_excluded = exclude_seen(merged, seen_items)
-    selected = unseen[: max(args.limit, 0)]
+    selected = select_review_queue(unseen, args.limit)
     output_meta = dict(input_meta)
     output_meta.update(
         {

@@ -10,14 +10,15 @@
 
     {"name": "AIbase", "aliases": ["aibase"], "domains": ["aibase.com"], "tier": 1, "group": "vertical", "weight": 42},
     {"name": "The Decoder", "aliases": ["the decoder", "the-decoder", "the decoder ai news"], "domains": ["the-decoder.com"], "tier": 1, "group": "vertical", "weight": 43},
-    {"name": "Claude Blog", "aliases": ["claude blog", "claude official", "anthropic engineering", "anthropic news"], "domains": ["anthropic.com"], "tier": 1, "group": "vertical", "weight": 44},
+    {"name": "Claude Blog", "aliases": ["claude blog", "claude official", "anthropic news"], "domains": ["claude.com", "anthropic.com"], "tier": 1, "group": "vertical", "weight": 44},
+    {"name": "Anthropic Engineering", "aliases": ["anthropic engineering blog"], "domains": ["anthropic.com"], "tier": 1, "group": "vertical", "weight": 44},
     {"name": "IT之家", "aliases": ["ithome", "it之家"], "domains": ["ithome.com"], "tier": 1, "group": "vertical", "weight": 38},
-    {"name": "Cursor Blog", "aliases": ["cursor blog"], "domains": ["cursor.com"], "tier": 1, "group": "vertical", "weight": 42},
+    {"name": "Cursor Blog", "aliases": ["cursor blog", "cursor changelog"], "domains": ["cursor.com"], "tier": 1, "group": "vertical", "weight": 42},
     {"name": "Emad Mostaque", "aliases": ["emad mostaque", "@emostaque"], "tier": 1, "group": "vertical", "weight": 39},
     {"name": "SemiAnalysis", "aliases": ["semianalysis"], "domains": ["semianalysis.com"], "tier": 1, "group": "vertical", "weight": 43},
     {"name": "Simon Willison", "aliases": ["simon willison", "simonw"], "domains": ["simonwillison.net"], "tier": 1, "group": "vertical", "weight": 41},
     {"name": "Latent.Space Podcast", "aliases": ["latent space", "latent.space", "latent space podcast"], "domains": ["latent.space"], "tier": 1, "group": "vertical", "weight": 42},
-    {"name": "OpenClaw", "aliases": ["openclaw", "openclaw official"], "tier": 1, "group": "vertical", "weight": 39},
+    {"name": "OpenClaw Releases", "aliases": ["openclaw", "openclaw official", "openclaw releases"], "domains": ["github.com"], "tier": 1, "group": "vertical", "weight": 44},
     {"name": "小红书技术", "aliases": ["小红书技术"], "tier": 1, "group": "vertical", "weight": 38},
     {"name": "数字生命卡兹克", "aliases": ["数字生命卡兹克"], "tier": 1, "group": "vertical", "weight": 38},
 
@@ -35,7 +36,7 @@
     {"name": "Techmeme", "aliases": ["techmeme"], "domains": ["techmeme.com"], "tier": 2, "group": "broad_signal", "weight": 29},
     {"name": "Google News", "aliases": ["google news"], "domains": ["news.google.com"], "tier": 2, "group": "broad_signal", "weight": 24},
     {"name": "36氪", "aliases": ["36氪", "36kr"], "domains": ["36kr.com"], "tier": 2, "group": "broad_signal", "weight": 27},
-    {"name": "Yahoo Finance", "aliases": ["yahoo finance"], "domains": ["finance.yahoo.com"], "tier": 2, "group": "broad_signal", "weight": 26},
+    {"name": "Yahoo Finance", "aliases": ["yahoo finance"], "tier": 2, "group": "broad_signal", "weight": 26},
     {"name": "Bloomberg", "aliases": ["bloomberg"], "domains": ["bloomberg.com"], "tier": 2, "group": "broad_signal", "weight": 34},
     {"name": "TechRadar", "aliases": ["techradar"], "domains": ["techradar.com"], "tier": 2, "group": "broad_signal", "weight": 27},
     {"name": "MacRumors", "aliases": ["macrumors"], "domains": ["macrumors.com"], "tier": 2, "group": "broad_signal", "weight": 27},
@@ -70,5 +71,5 @@
     "research": ["research", "研究", "paper", "论文", "benchmark", "基准", "safety", "安全", "alignment", "对齐", "education", "教育"],
     "models": ["model", "模型", "tool", "工具", "api", "agent", "智能体", "cli", "sdk", "release", "发布", "multimodal", "多模态"]
   },
-  "tracking_params": ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "ref", "source", "fbclid", "gclid"]
+  "tracking_params": ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "ref", "source", "yptr", "fbclid", "gclid"]
 }

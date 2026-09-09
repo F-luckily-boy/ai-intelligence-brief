@@ -185,6 +185,36 @@ class CollectSourcesTest(unittest.TestCase):
         self.assertEqual(items[0]["handle"], "@alice")
         self.assertEqual(items[0]["original_text"], "We shipped a new model.")
 
+    def test_xml_feed_can_exclude_noisy_titles_and_cap_summary(self) -> None:
+        data = b"""<?xml version="1.0"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <entry>
+            <title>release-publish/temporary</title>
+            <link rel="alternate" href="https://example.com/temporary"/>
+            <updated>2026-09-09T01:00:00Z</updated>
+            <content>noise</content>
+          </entry>
+          <entry>
+            <title>openclaw 2026.9.3</title>
+            <link rel="alternate" href="https://example.com/release"/>
+            <updated>2026-09-09T02:00:00Z</updated>
+            <content>1234567890</content>
+          </entry>
+        </feed>"""
+        items = collect_sources.parse_xml_feed(
+            data,
+            {
+                "name": "OpenClaw Releases",
+                "kind": "news",
+                "channel": "radar",
+                "exclude_title_pattern": r"^release-publish/",
+                "max_summary_chars": 6,
+                "max_items": 10,
+            },
+        )
+        self.assertEqual([item["title"] for item in items], ["openclaw 2026.9.3"])
+        self.assertEqual(items[0]["summary"], "123456")
+
     def test_derives_timestamp_for_manual_builder_evidence(self) -> None:
         published = datetime(2026, 9, 8, 12, 34, 56, tzinfo=timezone.utc)
         status_id = (
@@ -254,6 +284,111 @@ class CollectSourcesTest(unittest.TestCase):
             collect_sources.extract_aibase_article_ids(index, 2),
             ["30908", "30851"],
         )
+
+    def test_article_index_keeps_only_matching_unique_links(self) -> None:
+        data = b"""
+        <a href="/blog/one">one</a>
+        <a href="/blog/topic/research">topic</a>
+        <a href="/blog/one">duplicate</a>
+        <a href="/blog/two">two</a>
+        """
+        links = collect_sources.extract_index_links(
+            data,
+            {
+                "url": "https://example.com/blog",
+                "base_url": "https://example.com",
+                "link_pattern": r"^/blog/(?!topic/)[^/]+$",
+                "max_items": 10,
+            },
+        )
+        self.assertEqual(
+            links,
+            ["https://example.com/blog/one", "https://example.com/blog/two"],
+        )
+
+    def test_github_trending_parser_keeps_daily_stars(self) -> None:
+        data = b"""
+        <article class="Box-row">
+          <h2><a href="/openai/example"> openai / example </a></h2>
+          <p class="col-9 color-fg-muted my-1 pr-4">An AI agent toolkit.</p>
+          <span itemprop="programmingLanguage">Python</span>
+          <span>1,234 stars today</span>
+        </article>
+        """
+        parser = collect_sources.GitHubTrendingParser()
+        parser.feed(data.decode())
+        self.assertEqual(parser.items[0]["path"], "/openai/example")
+        self.assertEqual(parser.items[0]["description"], "An AI agent toolkit.")
+        self.assertEqual(parser.items[0]["language"], "Python")
+        self.assertEqual(parser.items[0]["stars_today"], 1234)
+
+    def test_github_trending_rejects_historical_cutoff(self) -> None:
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=2)
+        with self.assertRaisesRegex(ValueError, "live snapshot"):
+            collect_sources.collect_github_trending(
+                {"url": "https://github.com/trending", "name": "GitHub Trending"},
+                1,
+                cutoff,
+            )
+
+    def test_hacker_news_filters_exact_24h_and_sorts_by_heat(self) -> None:
+        cutoff = datetime(2026, 9, 9, 8, 0, tzinfo=timezone.utc)
+        payloads = {
+            "https://example.com/top.json": [1, 2, 3],
+            "https://hacker-news.firebaseio.com/v0/item/1.json": {
+                "id": 1,
+                "type": "story",
+                "title": "lower score",
+                "time": int((cutoff - timedelta(hours=2)).timestamp()),
+                "score": 50,
+                "descendants": 20,
+            },
+            "https://hacker-news.firebaseio.com/v0/item/2.json": {
+                "id": 2,
+                "type": "story",
+                "title": "higher score",
+                "time": int((cutoff - timedelta(hours=3)).timestamp()),
+                "score": 100,
+                "descendants": 5,
+            },
+            "https://hacker-news.firebaseio.com/v0/item/3.json": {
+                "id": 3,
+                "type": "story",
+                "title": "too old",
+                "time": int((cutoff - timedelta(hours=25)).timestamp()),
+                "score": 999,
+                "descendants": 999,
+            },
+        }
+
+        def fake_fetch(url: str, _timeout: float) -> bytes:
+            return json.dumps(payloads[url]).encode()
+
+        with patch.object(collect_sources, "fetch", side_effect=fake_fetch):
+            items = collect_sources.collect_hacker_news(
+                {
+                    "url": "https://example.com/top.json",
+                    "scan_items": 10,
+                    "max_items": 10,
+                },
+                1,
+                2,
+                cutoff,
+            )
+        self.assertEqual([item["title"] for item in items], ["higher score", "lower score"])
+
+    def test_unavailable_sources_are_not_resolved_as_feeds(self) -> None:
+        args = type(
+            "Args",
+            (),
+            {"builder_feed": [], "podcast_feed": []},
+        )()
+        config = {
+            "feeds": [{"name": "Live", "url": "https://example.com/feed"}],
+            "unavailable_sources": [{"name": "Closed", "reason": "No public feed"}],
+        }
+        specs = collect_sources.resolve_specs(config, args)
+        self.assertEqual([spec["name"] for spec in specs], ["Live"])
 
 
 if __name__ == "__main__":

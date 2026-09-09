@@ -90,6 +90,60 @@
       "max_items": 80
     },
     {
+      "name": "Claude Blog",
+      "url": "https://claude.com/blog",
+      "base_url": "https://claude.com",
+      "link_pattern": "^/blog/(?!topic/)[^/]+$",
+      "format": "article_index",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 40
+    },
+    {
+      "name": "Anthropic Engineering",
+      "url": "https://www.anthropic.com/engineering",
+      "base_url": "https://www.anthropic.com",
+      "link_pattern": "^/engineering/[^/]+$",
+      "format": "article_index",
+      "kind": "blog",
+      "channel": "radar",
+      "max_items": 40
+    },
+    {
+      "name": "Cursor Blog",
+      "url": "https://cursor.com/blog",
+      "base_url": "https://cursor.com",
+      "link_pattern": "^/blog/(?!topic/)[^/]+$",
+      "format": "article_index",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 60
+    },
+    {
+      "name": "Cursor Changelog",
+      "url": "https://cursor.com/changelog/rss.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "小红书技术",
+      "url": "https://wechat2rss.bestblogs.dev/feed/0f8c47df6fd304112518544776e0bbf1d98ba0b9.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "数字生命卡兹克",
+      "url": "https://wechat2rss.bestblogs.dev/feed/ff621c3e98d6ae6fceb3397e57441ffc6ea3c17f.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
       "name": "TechCrunch AI",
       "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
       "format": "rss",
@@ -122,6 +176,24 @@
       "max_items": 100
     },
     {
+      "name": "Claude Code Releases",
+      "url": "https://github.com/anthropics/claude-code/releases.atom",
+      "format": "atom",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 40
+    },
+    {
+      "name": "OpenClaw Releases",
+      "url": "https://github.com/openclaw/openclaw/releases.atom",
+      "format": "atom",
+      "kind": "news",
+      "channel": "radar",
+      "exclude_title_pattern": "^release-publish/",
+      "max_summary_chars": 20000,
+      "max_items": 20
+    },
+    {
       "name": "Simon Willison",
       "url": "https://simonwillison.net/atom/everything/",
       "format": "atom",
@@ -147,6 +219,97 @@
       "max_items": 100
     },
     {
+      "name": "WaytoAGI",
+      "url": "https://wechat2rss.bestblogs.dev/feed/ddc8d4d93c8ab3faa82675c2797aed5069cbc6f0.xml",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "WaytoAGI",
+      "max_items": 20
+    },
+    {
+      "name": "V2EX",
+      "url": "https://www.v2ex.com/index.xml",
+      "format": "atom",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "V2EX",
+      "max_items": 80
+    },
+    {
+      "name": "Readhub AI",
+      "url": "https://readhub.cn/rss",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Readhub AI",
+      "max_items": 80
+    },
+    {
+      "name": "虎嗅",
+      "url": "https://www.huxiu.com/site_map/article_1.xml",
+      "path_prefixes": ["/article/"],
+      "format": "sitemap_articles",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "虎嗅",
+      "max_items": 80
+    },
+    {
+      "name": "GitHub Trending",
+      "url": "https://github.com/trending",
+      "format": "github_trending",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "GitHub Trending",
+      "max_items": 50
+    },
+    {
+      "name": "Google News",
+      "url": "https://news.google.com/rss/search?q=artificial+intelligence+when:1d&hl=en-US&gl=US&ceid=US:en",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Google News",
+      "max_items": 100
+    },
+    {
+      "name": "36氪",
+      "url": "https://36kr.com/feed",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "36氪",
+      "max_items": 80
+    },
+    {
+      "name": "Yahoo Finance",
+      "url": "https://finance.yahoo.com/rss/topstories",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Yahoo Finance",
+      "max_items": 80
+    },
+    {
+      "name": "Bloomberg",
+      "url": "https://feeds.bloomberg.com/technology/news.rss",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Bloomberg",
+      "max_items": 80
+    },
+    {
+      "name": "TechRadar",
+      "url": "https://www.techradar.com/rss",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "TechRadar",
+      "max_items": 80
+    },
+    {
       "name": "MacRumors",
       "url": "https://feeds.macrumors.com/MacRumors-All",
       "format": "rss",
@@ -166,12 +329,20 @@
     },
     {
       "name": "Hacker News",
-      "url": "https://hacker-news.firebaseio.com/v0/newstories.json",
+      "url": "https://hacker-news.firebaseio.com/v0/topstories.json",
       "format": "hacker_news",
       "kind": "community",
       "channel": "community",
       "community_group": "Hacker News",
-      "max_items": 180
+      "scan_items": 500,
+      "max_items": 100
+    }
+  ],
+  "unavailable_sources": [
+    {
+      "name": "Emad Mostaque",
+      "url": "https://x.com/EMostaque",
+      "reason": "X does not provide a reliable public per-account feed without authenticated API access; search snippets are not post evidence."
     }
   ],
   "optional_feeds": [

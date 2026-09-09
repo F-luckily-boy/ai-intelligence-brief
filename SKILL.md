@@ -23,9 +23,11 @@ source and verifying the claim.
      --as-of 2026-09-09T08:00:00+08:00
    ```
 
-   The bundled registry includes Zara Zhang's public Follow Builders central
-   JSON feed. It is generated upstream with the official X API and does not
-   require a local X token. Use `--builder-feed URL` only to add another
+   The bundled registry includes the official, vertical, selected-media, broad
+   signal, community, and public WeChat relay sources documented in
+   `source-feeds.json`. It also includes Zara Zhang's public Follow Builders
+   central JSON feed, generated upstream with the official X API without
+   requiring a local X token. Use `--builder-feed URL` only to add another
    Builder RSS/JSON source.
 
    When a user supplies direct X post links in a reference PDF or file,
@@ -178,7 +180,8 @@ Required: `title`, `url`, `source`, `published_at`.
   coverage reference only; never evidence that an account posted.
 - [editorial-format.md](references/editorial-format.md): writing and layout.
 - `scripts/collect_sources.py`: RSS/Atom, JSON, AIbase, Hacker News, optional
-  Follow Builders, and podcast collection with lane diagnostics.
+  article-index, sitemap, GitHub Trending, Follow Builders, and podcast
+  collection with lane diagnostics.
 - `scripts/rank_candidates.py`: lane-window filtering, ranking, and safe
   deduplication.
 - `scripts/validate_brief.py`: publication contract checks.

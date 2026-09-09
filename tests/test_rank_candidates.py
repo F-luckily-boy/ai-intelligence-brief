@@ -178,6 +178,39 @@ class RankCandidatesTest(unittest.TestCase):
             {"official": 1, "vertical": 1, "builders": 1},
         )
 
+    def test_parallel_lanes_survive_global_review_limit(self):
+        items = [
+            {
+                "title": "broad high",
+                "source_group": "broad_signal",
+                "internal_score": 100,
+                "published_at": "2026-09-04T12:00:00+00:00",
+            },
+            {
+                "title": "broad second",
+                "source_group": "broad_signal",
+                "internal_score": 90,
+                "published_at": "2026-09-04T12:00:00+00:00",
+            },
+            {
+                "title": "builder useful",
+                "source_group": "builders",
+                "internal_score": 20,
+                "published_at": "2026-09-04T12:00:00+00:00",
+            },
+            {
+                "title": "community useful",
+                "source_group": "community",
+                "internal_score": 10,
+                "published_at": "2026-09-04T12:00:00+00:00",
+            },
+        ]
+        selected = ranker.select_review_queue(items, 3)
+        self.assertEqual(
+            {item["title"] for item in selected},
+            {"broad high", "builder useful", "community useful"},
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

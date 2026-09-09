@@ -1,5 +1,5 @@
 name: ai-intelligence-brief
-version: 1.2.0
+version: 1.3.0
 display_name: AI 情报简报
 description: >-
   采集过去 24 小时的 AI 圈资讯，按官方一手源、AI 垂直源、Builders/X、社区和精选媒体分层，

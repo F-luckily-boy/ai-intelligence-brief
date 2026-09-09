@@ -1,0 +1,32 @@
+name: ai-intelligence-brief
+version: 1.2.0
+display_name: AI 情报简报
+description: >-
+  采集过去 24 小时的 AI 圈资讯，按官方一手源、AI 垂直源、Builders/X、社区和精选媒体分层，
+  使用关键词相关性与信息源权重筛选，生成中文 AI 情报简报，并支持 Markdown、HTML 和 PDF 输出。
+triggers:
+  - AI 情报简报
+  - AI 日报
+  - AI 简报
+  - 过去 24 小时 AI 资讯
+  - Builders 动态
+  - builder digest
+  - AI 圈发生了什么
+entrypoint:
+  instructions: SKILL.md
+  references:
+    - references/source-strategy.md
+    - references/source-policy.json
+    - references/source-feeds.json
+    - references/builder-roster.json
+    - references/editorial-format.md
+  scripts:
+    - scripts/collect_sources.py
+    - scripts/hydrate_builder_evidence.py
+    - scripts/rank_candidates.py
+    - scripts/validate_brief.py
+    - scripts/render_brief.py
+runtime:
+  python: "3.10+"
+  browser: required_for_collection
+  chrome_or_chromium: optional_for_pdf

@@ -1,0 +1,187 @@
+{
+  "feeds": [
+    {
+      "name": "Follow Builders",
+      "url": "https://raw.githubusercontent.com/zarazhangrui/follow-builders/main/feed-x.json",
+      "format": "follow_builders_json",
+      "kind": "builder",
+      "channel": "builders",
+      "max_items": 500
+    },
+    {
+      "name": "OpenAI News",
+      "url": "https://openai.com/news/rss.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "GitHub Changelog",
+      "url": "https://github.blog/changelog/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "GitHub Blog",
+      "url": "https://github.blog/ai-and-ml/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "Google AI Blog",
+      "url": "https://blog.google/technology/ai/rss/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "Google DeepMind News",
+      "url": "https://deepmind.google/blog/rss.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "Hugging Face Blog",
+      "url": "https://huggingface.co/blog/feed.xml",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "AIbase",
+      "url": "https://news.aibase.com/news",
+      "article_template": "https://www.aibase.com/zh/news/{id}",
+      "format": "aibase_index",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 100
+    },
+    {
+      "name": "The Decoder",
+      "url": "https://the-decoder.com/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "IT之家",
+      "url": "https://www.ithome.com/rss/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 240
+    },
+    {
+      "name": "SemiAnalysis",
+      "url": "https://www.semianalysis.com/feed",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "TechCrunch AI",
+      "url": "https://techcrunch.com/category/artificial-intelligence/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "The Verge AI",
+      "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+      "format": "atom",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "Artificial Intelligence News",
+      "url": "https://www.artificialintelligence-news.com/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 80
+    },
+    {
+      "name": "MarkTechPost Research",
+      "url": "https://www.marktechpost.com/feed/",
+      "format": "rss",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 100
+    },
+    {
+      "name": "Simon Willison",
+      "url": "https://simonwillison.net/atom/everything/",
+      "format": "atom",
+      "kind": "news",
+      "channel": "radar",
+      "max_items": 100
+    },
+    {
+      "name": "Latent.Space Podcast",
+      "url": "https://api.substack.com/feed/podcast/1084089.rss",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "Techmeme",
+      "url": "https://www.techmeme.com/feed.xml",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Techmeme",
+      "max_items": 100
+    },
+    {
+      "name": "MacRumors",
+      "url": "https://feeds.macrumors.com/MacRumors-All",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "MacRumors",
+      "max_items": 100
+    },
+    {
+      "name": "Product Hunt",
+      "url": "https://www.producthunt.com/feed",
+      "format": "atom",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Product Hunt",
+      "max_items": 100
+    },
+    {
+      "name": "Hacker News",
+      "url": "https://hacker-news.firebaseio.com/v0/newstories.json",
+      "format": "hacker_news",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Hacker News",
+      "max_items": 180
+    }
+  ],
+  "optional_feeds": [
+    {
+      "name": "AI Podcast Feed",
+      "env": "AI_PODCAST_FEED_URL",
+      "format": "auto",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 30
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI 情报简报"
+  short_description: "多通道采集、核验并生成中文 AI 简报"
+  default_prompt: "Use $ai-intelligence-brief to collect and produce a verified multi-lane Chinese AI daily brief."

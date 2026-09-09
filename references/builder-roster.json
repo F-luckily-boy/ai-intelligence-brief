@@ -1,0 +1,29 @@
+{
+  "description": "Reference roster for reviewing intended Builder coverage. It is not evidence that an account posted inside the reporting window, a mandatory checklist, or a publication quota.",
+  "accounts": [
+    {"name": "Nikunj Kothari", "handle": "@nikunj", "profile_url": "https://x.com/nikunj", "topics": ["agent workflows", "Claude Code", "developer practice"]},
+    {"name": "Thibault Sottiaux", "handle": "@thsottiaux", "profile_url": "https://x.com/thsottiaux", "topics": ["Codex", "ChatGPT Work", "OpenAI product operations"]},
+    {"name": "Aaron Levie", "handle": "@levie", "profile_url": "https://x.com/levie", "topics": ["enterprise AI", "agents", "AI economics"]},
+    {"name": "Swyx", "handle": "@swyx", "profile_url": "https://x.com/swyx", "topics": ["AI engineering", "agents", "evaluation", "developer tools"]},
+    {"name": "Zara Zhang", "handle": "@zarazhangrui", "profile_url": "https://x.com/zarazhangrui", "topics": ["builders", "product", "founder practice"]},
+    {"name": "Amjad Masad", "handle": "@amasad", "profile_url": "https://x.com/amasad", "topics": ["Replit", "agents", "software creation"]},
+    {"name": "Guillermo Rauch", "handle": "@rauchg", "profile_url": "https://x.com/rauchg", "topics": ["Vercel", "AI models", "developer infrastructure"]},
+    {"name": "Peter Yang", "handle": "@petergyang", "profile_url": "https://x.com/petergyang", "topics": ["AI product", "Codex workflows", "builders"]},
+    {"name": "Peter Steinberger", "handle": "@steipete", "profile_url": "https://x.com/steipete", "topics": ["coding agents", "agent-to-agent workflows", "developer tools"]},
+    {"name": "Madhu Guru", "handle": "@realmadhuguru", "profile_url": "https://x.com/realmadhuguru", "topics": ["product reviews", "AI product development", "market simulation"]},
+    {"name": "Emad Mostaque", "handle": "@EMostaque", "profile_url": "https://x.com/EMostaque", "topics": ["open models", "AI infrastructure", "industry"]},
+    {"name": "SemiAnalysis", "handle": "@SemiAnalysis_", "profile_url": "https://x.com/SemiAnalysis_", "topics": ["AI infrastructure", "chips", "model economics"]},
+    {"name": "Boris Cherny", "handle": "@bcherny", "profile_url": "https://x.com/bcherny", "topics": ["Claude Code", "coding agents", "agent orchestration", "engineering practice"]},
+    {"name": "Andrej Karpathy", "handle": "@karpathy", "profile_url": "https://x.com/karpathy", "topics": ["AI programming", "AutoResearch", "AI education", "personal workflows"]},
+    {"name": "Michael Truell", "handle": "@mntruell", "profile_url": "https://x.com/mntruell", "topics": ["Cursor", "AI IDE", "agent products", "engineering organization"]},
+    {"name": "Aman Sanger", "handle": "@amanrsanger", "profile_url": "https://x.com/amanrsanger", "topics": ["Cursor", "model training", "developer tools", "product infrastructure"]},
+    {"name": "Harrison Chase", "handle": "@hwchase17", "profile_url": "https://x.com/hwchase17", "topics": ["LangChain", "LangGraph", "agent engineering", "context engineering", "evals"]},
+    {"name": "Jason Liu", "handle": "@jxnlco", "profile_url": "https://x.com/jxnlco", "topics": ["Codex DevEx", "Instructor", "structured outputs", "RAG", "agents"]},
+    {"name": "Hamel Husain", "handle": "@HamelHusain", "profile_url": "https://x.com/HamelHusain", "topics": ["AI evals", "LLM engineering", "production AI", "open source"]},
+    {"name": "Simon Willison", "handle": "@simonw", "profile_url": "https://x.com/simonw", "topics": ["LLM tools", "agent security", "data", "open source"]},
+    {"name": "Thariq Shaukat", "handle": "@trq212", "profile_url": "https://x.com/trq212", "topics": ["Anthropic", "Claude", "coding agents", "product engineering"]},
+    {"name": "Matt Turck", "handle": "@mattturck", "profile_url": "https://x.com/mattturck", "topics": ["AI industry", "venture capital", "data infrastructure", "podcasts"]},
+    {"name": "Sam Altman", "handle": "@sama", "profile_url": "https://x.com/sama", "topics": ["OpenAI", "frontier models", "AI policy", "product strategy"]},
+    {"name": "Dan Shipper", "handle": "@danshipper", "profile_url": "https://x.com/danshipper", "topics": ["AI-native work", "agents", "media", "product building"]}
+  ]
+}

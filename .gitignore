@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+venv/
+
+# 本地产出，不入库
+output/
+candidates.json
+ranked.json
+*.pdf

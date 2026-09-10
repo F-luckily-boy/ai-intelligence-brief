@@ -1,48 +1,69 @@
-# AI 情报简报
+# AI Intelligence Brief
 
-这是一个可导入腾讯 WorkBuddy 的 AI 情报简报 Skill。
+A self-contained skill that collects, verifies, and renders a daily Chinese-language AI intelligence brief across official, vertical-media, Builder/X, community, and podcast feeds.
 
-## 安装
+## What it does
 
-### 方式一：WorkBuddy 本地导入
+Each run gathers the last 24 hours of AI signals (with longer look-back windows for builders, community, and long-form content), scores them by keyword relevance and source authority, deduplicates across sources and days, then renders an edited Chinese brief to Markdown, HTML, and optional PDF.
 
-在 WorkBuddy 的 Skills / 技能管理中选择“添加本地 Skill”，选择这个目录：
+## Coverage
 
-`ai-intelligence-brief/`
+### Tier 0 — Official first-party
+OpenAI News · Google AI Blog · Google DeepMind · Hugging Face Blog · GitHub Blog / Changelog
 
-目录中应同时看到 `SKILL.md`、`skill.yml`、`references/`、`scripts/` 和 `assets/`。
+### Tier 1 — AI vertical media
+AIbase · The Decoder · IT之家 · Claude / Anthropic Blog · Cursor Blog · SemiAnalysis · OpenClaw Releases · Simon Willison · 小红书技术 · 数字生命卡兹克
 
-### 方式二：手动复制
+### Selected international AI media
+TechCrunch AI · The Verge AI · Artificial Intelligence News · MarkTechPost · Claude Code Releases
 
-将整个 `ai-intelligence-brief` 文件夹复制到：
+### Builders / X
+Follow Builders — a public feed of first-hand posts from AI-product builders and core developers.
 
-`~/.workbuddy/skills/ai-intelligence-brief/`
+### Community
+Hacker News · WaytoAGI · V2EX · Readhub AI · 虎嗅 · 36氪 · GitHub Trending · Techmeme · Google News · TechRadar · MacRumors · Product Hunt · Slashdot · 掘金 · MakeUseOf
 
-然后重启 WorkBuddy，或在技能管理中刷新。
+### Podcasts
+Lenny's Podcast · Dwarkesh · No Priors · TWIML · Machine Learning Street Talk · AI Daily Brief · Hard Fork · Latent.Space
 
-## 使用
+## Output sections
 
-直接输入：
+- **过去 24 小时 · AI 圈信号** — news grouped into 核心头条 / 产业与商业 / 模型与工具 / 研究与深度
+- **Builders · 他们在说什么** — first-hand posts with original text and Chinese translation
+- **社区精选** — practitioner discussions from HN, V2EX, 掘金, Slashdot, and more
+- **播客精选** — long-form podcast highlights
 
-`用 AI 情报简报 Skill 获取今天的 AI 简报，覆盖官方源、AI 媒体和 Builders，并输出 PDF。`
+## Directory layout
 
-也可以手动调用：
+```
+.
+├── ai-intelligence-brief/   ← the skill (drop-in)
+│   ├── SKILL.md             ← full workflow + editorial rules
+│   ├── skill.yml
+│   ├── agents/
+│   ├── assets/
+│   ├── references/          ← feed registry, source policy, editorial format
+│   ├── scripts/             ← collect → rank → validate → render pipeline
+│   └── tests/
+├── README.md
+├── .gitignore
+└── LICENSE
+```
 
-`@skill:ai-intelligence-brief 获取过去 24 小时 AI 资讯`
+## Requirements
 
-## 输出
+- Python 3.10+ (collection and ranking use only the standard library)
+- Network access for collection
+- Chrome/Chromium only if you want PDF output (Markdown and HTML work without it)
 
-- 默认按 Asia/Shanghai 的过去 24 小时采集
-- 检查核心 Builder 名单及已连接的 Follow Builders 信源
-- 自动进行关键词匹配、信源权重排序和跨来源/跨日期去重
-- 所有 Builder 内容统一展示在“Builder 精选动态”；双源证据仅用于内部加权和去重
-- 播客使用中英双语详细精读，并在输出前执行最低内容深度校验
-- 支持 Markdown、HTML；环境有 Chrome/Chromium 时支持 PDF
+## Pipeline
 
-## 运行环境
+```
+scripts/collect_sources.py   # gather + window-filter candidates from all feeds
+scripts/rank_candidates.py   # keyword/authority scoring + safe dedup
+  (editorial pass)           # human-in-the-loop review, grouping, Chinese titles
+scripts/validate_brief.py    # publication contract checks
+scripts/render_brief.py      # Markdown / HTML / optional PDF
+```
 
-- WorkBuddy 的浏览器/联网能力，用于抓取实时资讯
-- Python 3.10 或更高版本，用于运行排序、校验和渲染脚本
-- Chrome 或 Chromium 仅在需要打印 PDF 时使用
-
-脚本必须从 Skill 根目录（包含 `SKILL.md` 的目录）运行。
+See `ai-intelligence-brief/SKILL.md` for the full workflow, candidate contract, and editorial rules.

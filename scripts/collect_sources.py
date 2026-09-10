@@ -66,6 +66,9 @@ def parse_datetime(value: Any) -> datetime | None:
     except ValueError:
         try:
             parsed = parsedate_to_datetime(raw)
+            # RFC 822 "-0000" parses to a naive datetime but means UTC.
+            if parsed is not None and parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
         except (TypeError, ValueError):
             return None
     if parsed.tzinfo is None:
@@ -119,6 +122,16 @@ def entry_link(element: ET.Element) -> str:
         if href and rel in {"alternate", ""}:
             return href
         if child.text and child.text.strip():
+            return child.text.strip()
+    # Fallback: some podcast feeds (e.g. megaphone.fm) omit <link> and only
+    # expose the audio <enclosure>; use its URL so the item is still captured.
+    for child in element.iter():
+        if local_name(child.tag) == "enclosure":
+            href = str(child.attrib.get("url") or "").strip()
+            if href:
+                return href
+    for child in element.iter():
+        if local_name(child.tag) == "guid" and child.text:
             return child.text.strip()
     return ""
 

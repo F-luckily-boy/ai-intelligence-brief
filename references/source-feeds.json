@@ -79,7 +79,7 @@
       "format": "rss",
       "kind": "news",
       "channel": "radar",
-      "max_items": 240
+      "max_items": 500
     },
     {
       "name": "SemiAnalysis",
@@ -210,6 +210,62 @@
       "max_items": 20
     },
     {
+      "name": "Lenny's Podcast",
+      "url": "https://api.substack.com/feed/podcast/10845.rss",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "Dwarkesh Podcast",
+      "url": "https://api.substack.com/feed/podcast/69345.rss",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "No Priors",
+      "url": "https://feeds.megaphone.fm/nopriors",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "TWIML AI Podcast",
+      "url": "https://feeds.megaphone.fm/MLN2155636147",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "Machine Learning Street Talk",
+      "url": "https://anchor.fm/s/1e4a0eac/podcast/rss",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "AI Daily Brief",
+      "url": "https://anchor.fm/s/f7cac464/podcast/rss",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
+      "name": "Hard Fork",
+      "url": "https://feeds.simplecast.com/l2i9YnTd",
+      "format": "rss",
+      "kind": "podcast",
+      "channel": "radar",
+      "max_items": 20
+    },
+    {
       "name": "Techmeme",
       "url": "https://www.techmeme.com/feed.xml",
       "format": "rss",
@@ -217,6 +273,33 @@
       "channel": "community",
       "community_group": "Techmeme",
       "max_items": 100
+    },
+    {
+      "name": "Slashdot",
+      "url": "https://rss.slashdot.org/Slashdot/slashdotMain",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "Slashdot",
+      "max_items": 80
+    },
+    {
+      "name": "掘金",
+      "url": "https://juejin.cn/rss",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "掘金",
+      "max_items": 80
+    },
+    {
+      "name": "MakeUseOf",
+      "url": "https://www.makeuseof.com/feed/",
+      "format": "rss",
+      "kind": "community",
+      "channel": "community",
+      "community_group": "MakeUseOf",
+      "max_items": 80
     },
     {
       "name": "WaytoAGI",
@@ -248,7 +331,9 @@
     {
       "name": "虎嗅",
       "url": "https://www.huxiu.com/site_map/article_1.xml",
-      "path_prefixes": ["/article/"],
+      "path_prefixes": [
+        "/article/"
+      ],
       "format": "sitemap_articles",
       "kind": "community",
       "channel": "community",
@@ -343,6 +428,11 @@
       "name": "Emad Mostaque",
       "url": "https://x.com/EMostaque",
       "reason": "X does not provide a reliable public per-account feed without authenticated API access; search snippets are not post evidence."
+    },
+    {
+      "name": "DeepSeek 官方开放平台",
+      "url": "https://platform.deepseek.com",
+      "reason": "No public RSS/Atom feed; release announcements are pushed via the open-platform in-app notice and WeChat official account. Model-launch news is covered via IT之家/TechWeb/证券时报, so keep the IT之家 feed window wide enough (max_items >= 500) to avoid missing launch notices."
     }
   ],
   "optional_feeds": [

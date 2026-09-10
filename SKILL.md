@@ -58,8 +58,16 @@ source and verifying the claim.
      --builder-hours 36 \
      --community-hours 48 \
      --longform-hours 72 \
-     --limit 100
+     --limit 100 \
+     --seen output/2026-09-08/ranked.json
    ```
+
+   Always pass `--seen <previous-ranked.json>` so cross-day deduplication
+   actually runs. **Keep the previous day's `ranked.json`** (with the
+   editor-assigned `claim_id` values) for this purpose; do not delete it after
+   rendering. When no prior `ranked.json` exists, skip `--seen` and rely on
+   the editorial pass to drop repeats against the previous day's published
+   brief, and note any repeated-event judgments explicitly.
 
 7. Open the shortlisted links. Remove unsupported, promotional, stale, thin,
    or off-topic items. Assign the same `claim_id` only to duplicate coverage
@@ -160,6 +168,12 @@ Required: `title`, `url`, `source`, `published_at`.
   the published brief.
 - Do not use profile or aggregator links as evidence for a Builder post.
 - Never fabricate an X status URL, timestamp, quote, metric, or source.
+- A price cut / pricing-change signal is usually the tail of a larger event.
+  Before publishing it as a standalone item, check whether the same vendor
+  announced a new model release, launch, or version in the window (e.g. a
+  "降价/调价" report alongside a "V4.1 Flash 发布" announcement). Surface the
+  release/launch as the main claim and fold the pricing change into it, so the
+  primary fact (a new model shipping) is never reduced to a pricing footnote.
 - A prior brief is optional context for cross-day deduplication, not an input
   requirement. When none is available, label repeated-event judgments as an
   editorial note only when the evidence supports them.

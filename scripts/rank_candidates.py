@@ -94,6 +94,11 @@ def source_metadata(source: str, policy: dict[str, Any], item: dict[str, Any]) -
         channels.add(str(item["channel"]))
     if item.get("kind") == "builder" or "builders" in channels:
         default.update({"tier": 2, "group": "builders", "weight": 32})
+    # Long-form lanes (podcast/blog) are first-class parallel review groups, not
+    # broad signals. Keep them out of the broad-signal bucket so the review
+    # queue preserves them instead of letting news crowd them out.
+    if item.get("kind") in {"podcast", "blog"}:
+        default.update({"tier": 2, "group": "community", "weight": 30})
     default["name"] = source or "Unknown"
     return default
 
@@ -198,6 +203,66 @@ def title_similarity(left: Any, right: Any) -> float:
     return SequenceMatcher(None, a, b).ratio()
 
 
+# Brand/product tokens that tend to survive cross-source republication. Used to
+# detect the same story when titles differ (e.g. official EN vs. aggregate ZH),
+# which string similarity alone cannot catch.
+BRAND_TERMS = {
+    "openai", "chatgpt", "gpt", "codex", "astra", "sora",
+    "anthropic", "claude", "opus", "sonnet", "haiku",
+    "deepseek", "深度求索",
+    "qwen", "通义",
+    "gemini", "deepmind",
+    "llama", "meta",
+    "mistral",
+    "grok",
+    "cursor",
+    "hugging face", "huggingface",
+    "kimi", "moonshot",
+    "glm", "智谱",
+    "minimax",
+    "蚂蚁", "ant group",
+}
+
+_MODEL_VER_RE = re.compile(
+    r"(?<![a-z0-9])(?:gpt|claude|opus|sonnet|haiku|gemini|llama|qwen|glm|kimi)[- ]?\d+(?:\.\d+)*(?![a-z0-9])",
+    re.IGNORECASE,
+)
+_BARE_VER_RE = re.compile(
+    r"(?<![a-z0-9])v[- ]?\d+(?:\.\d+)*(?![a-z0-9])", re.IGNORECASE
+)
+_LEVEL_RE = re.compile(
+    r"(?<![a-z0-9])(?:flash|pro|mini|lite|nano|turbo)(?![a-z0-9])", re.IGNORECASE
+)
+
+
+def entity_keys(text: str) -> set[str]:
+    # Work on the casefolded original so version dots ("v4.1") survive; use
+    # a-z0-9 lookarounds instead of \b, which fails on CJK-adjacent latin text.
+    low = str(text or "").casefold()
+    keys: set[str] = set()
+    for term in BRAND_TERMS:
+        if re.search(rf"(?<![a-z0-9]){re.escape(term)}(?![a-z0-9])", low):
+            keys.add("brand:" + term)
+    for match in _MODEL_VER_RE.finditer(low):
+        keys.add("model:" + re.sub(r"\s+", "-", match.group(0)))
+    for match in _BARE_VER_RE.finditer(low):
+        keys.add("ver:" + re.sub(r"\s+", "", match.group(0)))
+    for match in _LEVEL_RE.finditer(low):
+        keys.add("level:" + match.group(0))
+    return keys
+
+
+def entity_overlap(left: str, right: str) -> float:
+    a = entity_keys(left)
+    b = entity_keys(right)
+    # Require at least two entity signals on each side. A lone shared brand
+    # (e.g. "OpenAI" on two unrelated stories) is too weak to dedupe on; those
+    # cases must fall through to claim_id or manual review.
+    if len(a) < 2 or len(b) < 2:
+        return 0.0
+    return len(a & b) / min(len(a), len(b))
+
+
 def lane(item: dict[str, Any]) -> str:
     kind = str(item.get("kind") or "news")
     return "news" if kind == "news" else kind
@@ -212,7 +277,13 @@ def same_story(left: dict[str, Any], right: dict[str, Any]) -> bool:
     right_claim = str(right.get("claim_id") or "").strip()
     if left_claim and left_claim == right_claim:
         return True
-    return title_similarity(left.get("title"), right.get("title")) >= 0.92
+    if title_similarity(left.get("title"), right.get("title")) >= 0.92:
+        return True
+    # Cross-source fallback: brand + model/version overlap catches the same
+    # event republished under a different language or title.
+    if entity_overlap(left.get("title"), right.get("title")) >= 0.75:
+        return True
+    return False
 
 
 def prepare(
